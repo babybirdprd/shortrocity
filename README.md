@@ -4,12 +4,7 @@ Shortrocity is a tool for making AI generated short videos ("shorts" or "reels")
 
 ## Quick Start
 
-First, add your API-keys to the environment:
-
-```console
-$ export OPENAI_API_KEY=YOUR_OPENAI_API_KEY
-$ export ELEVENLABS_API_KEY=YOUR_ELEVENLABS_API_KEY
-```
+Start Koboldcpp
 
 Then, put your source content in a file, for example `source.txt` and run the `main.py`:
 
