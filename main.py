@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 
-from openai import OpenAI
-import time
+import requests
 import json
+import time
 import sys
 import os
 
-import narration
+import narration 
 import images
 import video
-
-client = OpenAI()
 
 if len(sys.argv) < 2:
     print(f"USAGE: {sys.argv[0]} SOURCE_FILENAME")
@@ -28,12 +26,8 @@ if not os.path.exists(basedir):
 
 print("Generating script...")
 
-response = client.chat.completions.create(
-    model="gpt-4",
-    messages=[
-        {
-            "role": "system",
-            "content": """You are a YouTube short narration generator. You generate 30 seconds to 1 minute of narration. The shorts you create have a background that fades from image to image as the narration is going on.
+response = requests.post("http://localhost:5000/api/v1/generate", json={
+    "prompt": f"""You are a YouTube short narration generator. You generate 30 seconds to 1 minute of narration. The shorts you create have a background that fades from image to image as the narration is going on.
 
 You will need to generate descriptions of images for each of the sentences in the short. They will be passed to an AI image generator. DO NOT IN ANY CIRCUMSTANCES use names of celebrities or people in the image descriptions. It is illegal to generate images of celebrities. Only describe persons without their names. Do not reference any real person or group in the image descriptions. Don't mention the female figure or other sexual content in the images because they are not allowed.
 
@@ -49,30 +43,28 @@ Respond with a pair of an image description in square brackets and a narration b
 
 Narrator: "One sentence of narration"
 
-[Description of a background image]
+[Description of a background image] 
 
 Narrator: "One sentence of narration"
 
 [Description of a background image]
 
-Narrator: "One sentence of narration"
+Narrator: "One sentence of narration" 
 
 ###
 
 The short should be 6 sentences maximum.
 
 You should add a description of a fitting backround image in between all of the narrations. It will later be used to generate an image with AI.
-"""
-        },
-        {
-            "role": "user",
-            "content": f"Create a YouTube short narration based on the following source material:\n\n{source_material}"
-        }
-    ]
-)
 
-response_text = response.choices[0].message.content
-response_text.replace("’", "'").replace("`", "'").replace("…", "...").replace("“", '"').replace("”", '"')
+Create a YouTube short narration based on the following source material:
+
+{source_material}"""
+})
+
+response.raise_for_status()
+response_text = response.json()["results"][0]["text"]
+response_text.replace("'", "'").replace("`", "'").replace("…", "...").replace(""", '"').replace(""", '"')
 
 with open(os.path.join(basedir, "response.txt"), "w") as f:
     f.write(response_text)
@@ -87,7 +79,8 @@ narration.create(data, os.path.join(basedir, "narrations"))
 print("Generating images...")
 images.create_from_data(data, os.path.join(basedir, "images"))
 
-print("Generating video...")
+print("Generating video...")  
 video.create(narrations, basedir, output_file)
 
 print(f"DONE! Here's your video: {os.path.join(basedir, output_file)}")
+
