@@ -1,6 +1,8 @@
 # Shortrocity
 
-Shortrocity is a tool for making AI generated short videos ("shorts" or "reels") with a ChatGPT generated script, narrated by ElevenLabs or OpenAI text-to-speech. DALL-E 3 generated background images are also added to the background.
+Shortrocity is a tool for making AI generated short videos ("shorts" or "reels") fully local, narrated by Melotts text-to-speech. SD generated background images are also added to the background.
+
+#WIP
 
 ## Quick Start
 
