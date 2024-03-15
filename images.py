@@ -1,8 +1,6 @@
-from openai import OpenAI
+import requests
 import base64
 import os
-
-client = OpenAI()
 
 def create_from_data(data, output_dir):
     if not os.path.exists(output_dir):
@@ -17,17 +15,15 @@ def create_from_data(data, output_dir):
         generate(element["description"] + ". Vertical image, fully filling the canvas.", os.path.join(output_dir, image_name))
 
 def generate(prompt, output_file, size="1024x1792"):
-    response = client.images.generate(
-        model="dall-e-3",
-        prompt=prompt,
-        size=size,
-        quality="standard",
-        response_format="b64_json",
-        n=1,
-    )
+    response = requests.post("http://localhost:5000/sdapi/v1/txt2img", json={
+        "prompt": prompt,
+        "width": int(size.split("x")[0]),
+        "height": int(size.split("x")[1]),
+        "steps": 25
+    })
+    response.raise_for_status()
 
-    image_b64 = response.data[0].b64_json
+    image_b64 = response.json()["images"][0]
 
     with open(output_file, "wb") as f:
         f.write(base64.b64decode(image_b64))
-
